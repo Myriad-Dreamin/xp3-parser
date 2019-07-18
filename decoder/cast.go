@@ -3,9 +3,9 @@ package decoder
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"strings"
 
+	logger "github.com/Myriad-Dreamin/xp3-parser/log"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -20,7 +20,7 @@ func UTF16ToUTF8(b []byte) []byte {
 	unicodeReader := transform.NewReader(bytes.NewReader(b), utf16bom)
 	decoded, err := ioutil.ReadAll(unicodeReader)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return nil
 	}
 	return decoded

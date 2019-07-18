@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"os"
+
+	logger "github.com/Myriad-Dreamin/xp3-parser/log"
 )
 
 var (
@@ -123,8 +123,7 @@ func ParseHeader(r *os.File) XP3Header {
 	var header = new(XP3Header30)
 	n, err := header.ReadFrom(r)
 	if err != nil && n != 11 {
-		fmt.Println(n, err)
-		log.Fatal(err)
+		logger.Fatal(err)
 		return nil
 	} else if err != nil && n == 11 {
 		var header2 = new(XP3Header28)

@@ -1,11 +1,11 @@
 package decoder
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
+
+	logger "github.com/Myriad-Dreamin/xp3-parser/log"
 )
 
 type callBackFunction func(*os.File)
@@ -23,7 +23,7 @@ func GetFileReader(path string, cb callBackFunction) error {
 func checkAvailable(fileName string) bool {
 	for _, charf := range fileName {
 		if charf == '$' {
-			fmt.Println("escaping", fileName)
+			logger.Warnln("escaping", fileName)
 			return false
 		}
 	}
@@ -49,7 +49,7 @@ func EscapeSpace(fileName []byte) []byte {
 	// if err == io.EOF {
 	// 	return wb.Bytes()
 	// }
-	// log.Fatal(err)
+	// logger.Fatal(err)
 	return fileName
 }
 
@@ -65,18 +65,19 @@ func createAndWrite(fileName []byte, buffer io.Reader) {
 	if _, err := os.Stat(wantedDir); os.IsNotExist(err) {
 		os.MkdirAll(wantedDir, 0755)
 	} else if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 	if f, err := os.Create(wantedFileName); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	} else {
 		defer f.Close()
 		_, err = io.TeeReader(buffer, f).Read(buf)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 			return
 		}
+		logger.Infof("extracted file: %v...\n", wantedFileName)
 	}
 }

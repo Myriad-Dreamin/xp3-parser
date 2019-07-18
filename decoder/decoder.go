@@ -3,12 +3,11 @@ package decoder
 import (
 	"bytes"
 	"compress/zlib"
-	"fmt"
 	"io"
-	"log"
 	"os"
 
 	data "github.com/Myriad-Dreamin/xp3-parser/data"
+	logger "github.com/Myriad-Dreamin/xp3-parser/log"
 )
 
 const (
@@ -19,8 +18,6 @@ var buf, buf2 []byte
 var fileDescriptors []*data.FileDescriptor
 
 func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-
 	buf = make([]byte, maxBufferSize)
 	buf2 = make([]byte, maxBufferSize)
 }
@@ -31,23 +28,21 @@ func Decode(toDecode string) {
 		var header = data.ParseHeader(r)
 		_, err := r.ReadAt(buf, int64(header.GetFileHeaderOffset()))
 		if err != nil && err != io.EOF {
-			log.Fatal(err)
+			logger.Fatal(err)
 			return
 		}
 		var fileheader = new(data.FileHeader)
 		n, err = fileheader.ReadFrom(bytes.NewBuffer(buf))
 		if err != nil && err != io.EOF {
-			log.Fatal(err)
+			logger.Fatal(err)
 			return
 		}
-		fmt.Println(header, n)
-		fmt.Println(fileheader.HeaderSize+uint64(n), uint64(len(buf)))
 		if fileheader.HeaderSize+uint64(n) > uint64(len(buf)) {
 			buf = append(buf, make([]byte, fileheader.HeaderSize+uint64(n)-uint64(len(buf)))...)
 		}
 		_, err = r.ReadAt(buf, int64(header.GetFileHeaderOffset())+int64(n))
 		if err != nil && err != io.EOF {
-			log.Fatal(err)
+			logger.Fatal(err)
 			return
 		}
 
@@ -55,7 +50,7 @@ func Decode(toDecode string) {
 		if fileheader.Compressed != 0 {
 			rr, err = zlib.NewReader(bytes.NewBuffer(buf[:fileheader.HeaderSize]))
 			if err != nil && err != io.EOF {
-				log.Fatal(err)
+				logger.Fatal(err)
 				return
 			}
 		} else {
@@ -69,7 +64,7 @@ func Decode(toDecode string) {
 			_, err = fileDescriptor.ReadFrom(rr)
 			if err != nil {
 				if err != io.EOF {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 				return
 			}
@@ -90,13 +85,13 @@ func Decode(toDecode string) {
 				}
 				_, err = r.ReadAt(buf[:segment.CompressedSize], int64(segment.Offset))
 				if err != nil && err != io.EOF {
-					log.Fatal(err)
+					logger.Fatal(err)
 					return
 				}
 				if segment.Flag != 0 {
 					rr, err = zlib.NewReader(bytes.NewBuffer(buf[:segment.CompressedSize]))
 					if err != nil && err != io.EOF {
-						log.Fatal(err)
+						logger.Fatal(err)
 						return
 					}
 				} else {
@@ -113,7 +108,7 @@ func Decode(toDecode string) {
 		Parse(r)
 		writeToFiles(r)
 	}); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 }
