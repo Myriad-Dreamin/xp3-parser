@@ -1,4 +1,7 @@
 # xp3-parser
 decode kirikiri xp3 file into files
 
-TODO: make this decoder for humans
+Usage:
+```bash
+xp3-parser path/to/file.xp3
+```
