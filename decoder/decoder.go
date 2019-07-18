@@ -3,6 +3,7 @@ package decoder
 import (
 	"bytes"
 	"compress/zlib"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -33,13 +34,14 @@ func Decode(toDecode string) {
 			log.Fatal(err)
 			return
 		}
-
 		var fileheader = new(data.FileHeader)
 		n, err = fileheader.ReadFrom(bytes.NewBuffer(buf))
 		if err != nil && err != io.EOF {
 			log.Fatal(err)
 			return
 		}
+		fmt.Println(header, n)
+		fmt.Println(fileheader.HeaderSize+uint64(n), uint64(len(buf)))
 		if fileheader.HeaderSize+uint64(n) > uint64(len(buf)) {
 			buf = append(buf, make([]byte, fileheader.HeaderSize+uint64(n)-uint64(len(buf)))...)
 		}

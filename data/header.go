@@ -103,6 +103,10 @@ func (h *XP3Header30) ReadFrom(r io.Reader) (nn int64, err error) {
 	if !bytes.Equal(index_size, h.IndexSize[:]) {
 		return 24, errors.New("not equal of index size (24-31 bytes)(kirikiri 2.30)")
 	}
+	err = binary.Read(r, KiriKiriEndian, &h.FileHeaderOffset)
+	if err != nil {
+		return 32, err
+	}
 	return 40, nil
 }
 
